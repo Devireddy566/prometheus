@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pod-restart-any
+  namespace: monitoring     # Replace if needed
+  labels:
+    release: prometheus     # Must match your Helm release name
+spec:
+  groups:
+    - name: pod-restart-any
+      rules:
+        - alert: PodRestartedOnce
+          expr: increase(kube_pod_container_status_restarts_total[5m]) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod restarted in {{ $labels.namespace }}/{{ $labels.pod }}"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} restarted at least once in the last 5 minutes."
